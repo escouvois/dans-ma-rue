@@ -1,0 +1,6 @@
+{
+    "elasticsearch": {
+        "uri": "http://localhost:9200",
+        "index_name": "dansmarue"
+    }
+}
