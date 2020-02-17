@@ -28,3 +28,5 @@ node_modules/
 
 # Unzipped CSV dataset
 dataset/dans-ma-rue.csv
+
+package-lock.json
