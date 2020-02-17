@@ -11,7 +11,7 @@ exports.count = (client, from, to, callback) => {
           range: {
             "anomalie.timestamp" : {
               gte: from,
-              lte: to
+              lt: to
             }
           }
         }
