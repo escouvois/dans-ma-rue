@@ -8,8 +8,27 @@ async function run() {
   // Create Elasticsearch client
   const client = new Client({ node: config.get("elasticsearch.uri") });
 
-  // Création de l'indice
-  checkIndices(client, indexName);
+  try{
+    await client.indices.delete({
+      index : indexName
+    });
+  } catch (error) {
+    console.log("index can't be deleted : doesn't exist.")
+  }
+
+  await client.indices.create({ index: indexName })
+
+  await client.indices.putMapping({
+    index: indexName,
+    body: {
+      properties: {
+        "anomalie.location" : {
+          type: 'geo_point'
+        }
+      }
+    }
+  })
+
   let anomalies = [];
   // Read CSV file
   fs.createReadStream("dataset/dans-ma-rue.csv")
@@ -61,14 +80,3 @@ function createBulkInsertQuery(anomalies) {
   return { body };
 }
 
-function checkIndices(client, name) {
-  client.indices.exists({ index: name }, (err, res, status) => {
-      if (res) {
-          console.log('index already exists');
-      } else {
-          client.indices.create({ index: name }, (err, res, status) => {
-              console.log(err, res, status);
-          });
-      }
-  });
-}
