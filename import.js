@@ -20,7 +20,7 @@ async function run() {
     )
     .on("data", data => {
       anomalies.push({
-        "timestamp": data.DATEDECL,
+        "timestamp": new Date(data.DATEDECL),
         "object_id": data.OBJECTID,
         "annee_declaration" : data["ANNEE DECLARATION"],
         "mois_declaration" : data["MOIS DECLARATION"],
