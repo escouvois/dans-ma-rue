@@ -43,6 +43,7 @@ async function run() {
         "object_id": data.OBJECTID,
         "annee_declaration" : data["ANNEE DECLARATION"],
         "mois_declaration" : data["MOIS DECLARATION"],
+        "mois_annee_declaration" : ('0' + data["MOIS DECLARATION"]).slice(-2) + '/' + data["ANNEE DECLARATION"],
         "type" : data.TYPE,
         "sous_type" : data.SOUSTYPE,
         "code_postal" : data.CODE_POSTAL,

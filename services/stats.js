@@ -17,7 +17,14 @@ exports.statsByArrondissement = (client, callback) => {
             }
         }
     }).then(resp => {
-        callback(resp.body.aggregations.arrondissements.buckets)
+        const res = resp.body.aggregations.arrondissements.buckets
+            .map(o => {
+                return {
+                    "arrondissement":o.key,
+                    "count":o.doc_count
+                }
+            });
+        callback(res);
     })
 }
 
@@ -50,7 +57,6 @@ exports.statsByType = (client, callback) => {
 
 exports.statsByMonth = (client, callback) => {
     // Trouver le top 10 des mois avec le plus d'anomalies
-    // TODO - Aggréger mois/année dans la key dans le résultat
     client.search({
         index: indexName,
         body: {
@@ -58,14 +64,21 @@ exports.statsByMonth = (client, callback) => {
             aggs: {
                 "mois": {
                     terms: {
-                        field: "mois_declaration.keyword",
+                        field: "mois_annee_declaration.keyword",
                         size: 10
                     }
                 }
             }
         }
     }).then(resp => {
-        callback(resp.body.aggregations.mois.buckets)
+        const res = resp.body.aggregations.mois.buckets
+            .map(o => {
+                return {
+                    "month":o.key,
+                    "count":o.doc_count
+                }
+            });
+        callback(res);
     })
 }
 
@@ -90,6 +103,13 @@ exports.statsPropreteByArrondissement = (client, callback) => {
             }
         }
     }).then(resp => {
-        callback(resp.body.aggregations.arrondissementsByType.arrondissements.buckets)
+        const res = resp.body.aggregations.arrondissementsByType.arrondissements.buckets
+            .map(o => {
+                return {
+                    "arrondissement":o.key,
+                    "count":o.doc_count
+                }
+            });
+        callback(res);
     })
 }
