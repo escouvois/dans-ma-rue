@@ -9,7 +9,7 @@ exports.count = (client, from, to, callback) => {
       body: {
         query: {
           range: {
-            "anomalie.timestamp" : {
+            "timestamp" : {
               gte: from,
               lt: to
             }
@@ -37,7 +37,7 @@ exports.countAround = (client, lat, lon, radius, callback) => {
                     filter: {
                         geo_distance: {
                             distance: radius,
-                            "anomalie.location": lat + ',' + lon
+                            "location": lat + ',' + lon
                         }
                     }
                 }

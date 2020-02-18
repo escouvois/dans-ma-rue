@@ -2,7 +2,7 @@ const config = require('config');
 const indexName = config.get('elasticsearch.index_name');
 
 exports.statsByArrondissement = (client, callback) => {
-    // TODO Compter le nombre d'anomalies par arondissement
+    // Compter le nombre d'anomalies par arondissement
     client.search({
         index: indexName,
         body: {
@@ -10,36 +10,40 @@ exports.statsByArrondissement = (client, callback) => {
             aggs: {
                 "arrondissements": {
                     terms: {
-                        field: "anomalie.arrondissement.keyword",
+                        field: "arrondissement.keyword",
                         size: 30
                     }
                 }
             }
         }
     }).then(resp => {
-        callback(resp.body.aggregations.arrondissements.buckets)
+        const res = resp.body.aggregations.arrondissements.buckets
+            .map(o => {
+                return {
+                    "arrondissement":o.key,
+                    "count":o.doc_count
+                }
+            });
+        callback(res);
     })
 }
 
 exports.statsByType = (client, callback) => {
-    // TODO Trouver le top 5 des types et sous types d'anomalies
+    // Trouver le top 5 des types et sous types d'anomalies
     client.search({
         index: indexName,
         body: {
-            "size": 0,
-            "aggs" : {
+            size: 0,
+            aggs : {
                 "types" : {
-                    "terms": {
-                        "field": "anomalie.type.keyword",
-                        "size" : 5
-                    },
-                    aggs: {
-                        "sous_types" : {
-                            "terms": {
-                                "field": "anomalie.sous_type.keyword",
-                                "size" : 5
-                            }
-                        }
+                    terms: {
+                        field: "type.keyword",
+                        size : 5
+                    }
+                },"soustypes" : {
+                    terms: {
+                        field: "sous_type.keyword",
+                        size : 5
                     }
                 }
             }
@@ -66,7 +70,6 @@ exports.statsByType = (client, callback) => {
 
 exports.statsByMonth = (client, callback) => {
     // Trouver le top 10 des mois avec le plus d'anomalies
-    // TODO - Aggréger mois/année dans la key dans le résultat
     client.search({
         index: indexName,
         body: {
@@ -74,14 +77,21 @@ exports.statsByMonth = (client, callback) => {
             aggs: {
                 "mois": {
                     terms: {
-                        field: "anomalie.mois_declaration.keyword",
+                        field: "mois_annee_declaration.keyword",
                         size: 10
                     }
                 }
             }
         }
     }).then(resp => {
-        callback(resp.body.aggregations.mois.buckets)
+        const res = resp.body.aggregations.mois.buckets
+            .map(o => {
+                return {
+                    "month":o.key,
+                    "count":o.doc_count
+                }
+            });
+        callback(res);
     })
 }
 
@@ -93,11 +103,11 @@ exports.statsPropreteByArrondissement = (client, callback) => {
             size: 0,
             aggs: {
                 "arrondissementsByType": {
-                    filter: { term: { "anomalie.type.keyword": "Propreté" }},
+                    filter: { term: { "type.keyword": "Propreté" }},
                     aggs: {
                         "arrondissements": {
                             terms: {
-                                field: "anomalie.arrondissement.keyword",
+                                field: "arrondissement.keyword",
                                 size: 3
                             }
                         }
@@ -106,6 +116,13 @@ exports.statsPropreteByArrondissement = (client, callback) => {
             }
         }
     }).then(resp => {
-        callback(resp.body.aggregations.arrondissementsByType.arrondissements.buckets)
+        const res = resp.body.aggregations.arrondissementsByType.arrondissements.buckets
+            .map(o => {
+                return {
+                    "arrondissement":o.key,
+                    "count":o.doc_count
+                }
+            });
+        callback(res);
     })
 }
