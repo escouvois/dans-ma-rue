@@ -3,12 +3,49 @@ const indexName = config.get('elasticsearch.index_name');
 
 exports.statsByArrondissement = (client, callback) => {
     // TODO Compter le nombre d'anomalies par arondissement
-    callback([]);
+    client.search({
+        index: indexName,
+        body: {
+            size: 0,
+            aggs: {
+                "arrondissements": {
+                    terms: {
+                        field: "anomalie.arrondissement.keyword",
+                        size: 30
+                    }
+                }
+            }
+        }
+    }).then(resp => {
+        callback(resp.body.aggregations.arrondissements.buckets)
+    })
 }
 
 exports.statsByType = (client, callback) => {
     // TODO Trouver le top 5 des types et sous types d'anomalies
-    callback([]);
+    client.search({
+        index: indexName,
+        body: {
+            "size": 0,
+            "aggs" : {
+                "types" : {
+                    "terms": {
+                        "field": "anomalie.type.keyword",
+                        "size" : 5
+                    }
+                },"soustypes" : {
+                    "terms": {
+                        "field": "anomalie.sous_type.keyword",
+                        "size" : 5
+                    }
+                }
+            }
+        }
+    }).then(resp => {
+        callback({top_types : resp.body.aggregations.types.buckets,
+            top_soustypes : resp.body.aggregations.soustypes.buckets
+            })
+    })
 }
 
 exports.statsByMonth = (client, callback) => {
