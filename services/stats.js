@@ -34,16 +34,19 @@ exports.statsByType = (client, callback) => {
         index: indexName,
         body: {
             size: 0,
-            aggs : {
+            "aggs" : {
                 "types" : {
-                    terms: {
-                        field: "type.keyword",
-                        size : 5
-                    }
-                },"soustypes" : {
-                    terms: {
-                        field: "sous_type.keyword",
-                        size : 5
+                    "terms": {
+                        "field": "type.keyword",
+                        "size" : 5
+                    },
+                    aggs: {
+                        "sous_types" : {
+                            "terms": {
+                                "field": "sous_type.keyword",
+                                "size" : 5
+                            }
+                        }
                     }
                 }
             }
