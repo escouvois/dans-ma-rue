@@ -13,7 +13,7 @@ async function run() {
       index : indexName
     });
   } catch (error) {
-    console.log("index can't be deleted : doesn't exist.")
+    console.log("Index can't be deleted. Error : " + error.message);
   }
 
   await client.indices.create({ index: indexName })
@@ -22,7 +22,7 @@ async function run() {
     index: indexName,
     body: {
       properties: {
-        "anomalie.location" : {
+        "location" : {
           type: 'geo_point'
         }
       }
@@ -73,7 +73,7 @@ run().catch(console.error);
 function createBulkInsertQuery(anomalies) {
   const body = anomalies.reduce((acc, anomalie) => {
     acc.push({ index: { _index: indexName, _type: '_doc', _id: anomalie.object_id } })
-    acc.push({ anomalie })
+    acc.push(anomalie)
     return acc
   }, []);
 

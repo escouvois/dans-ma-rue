@@ -2,7 +2,7 @@ const config = require('config');
 const indexName = config.get('elasticsearch.index_name');
 
 exports.statsByArrondissement = (client, callback) => {
-    // TODO Compter le nombre d'anomalies par arondissement
+    // Compter le nombre d'anomalies par arondissement
     client.search({
         index: indexName,
         body: {
@@ -10,7 +10,7 @@ exports.statsByArrondissement = (client, callback) => {
             aggs: {
                 "arrondissements": {
                     terms: {
-                        field: "anomalie.arrondissement.keyword",
+                        field: "arrondissement.keyword",
                         size: 30
                     }
                 }
@@ -22,21 +22,21 @@ exports.statsByArrondissement = (client, callback) => {
 }
 
 exports.statsByType = (client, callback) => {
-    // TODO Trouver le top 5 des types et sous types d'anomalies
+    // Trouver le top 5 des types et sous types d'anomalies
     client.search({
         index: indexName,
         body: {
-            "size": 0,
-            "aggs" : {
+            size: 0,
+            aggs : {
                 "types" : {
-                    "terms": {
-                        "field": "anomalie.type.keyword",
-                        "size" : 5
+                    terms: {
+                        field: "type.keyword",
+                        size : 5
                     }
                 },"soustypes" : {
-                    "terms": {
-                        "field": "anomalie.sous_type.keyword",
-                        "size" : 5
+                    terms: {
+                        field: "sous_type.keyword",
+                        size : 5
                     }
                 }
             }
@@ -58,7 +58,7 @@ exports.statsByMonth = (client, callback) => {
             aggs: {
                 "mois": {
                     terms: {
-                        field: "anomalie.mois_declaration.keyword",
+                        field: "mois_declaration.keyword",
                         size: 10
                     }
                 }
@@ -77,11 +77,11 @@ exports.statsPropreteByArrondissement = (client, callback) => {
             size: 0,
             aggs: {
                 "arrondissementsByType": {
-                    filter: { term: { "anomalie.type.keyword": "Propreté" }},
+                    filter: { term: { "type.keyword": "Propreté" }},
                     aggs: {
                         "arrondissements": {
                             terms: {
-                                field: "anomalie.arrondissement.keyword",
+                                field: "arrondissement.keyword",
                                 size: 3
                             }
                         }
