@@ -32,19 +32,35 @@ exports.statsByType = (client, callback) => {
                     "terms": {
                         "field": "anomalie.type.keyword",
                         "size" : 5
-                    }
-                },"soustypes" : {
-                    "terms": {
-                        "field": "anomalie.sous_type.keyword",
-                        "size" : 5
+                    },
+                    aggs: {
+                        "sous_types" : {
+                            "terms": {
+                                "field": "anomalie.sous_type.keyword",
+                                "size" : 5
+                            }
+                        }
                     }
                 }
             }
         }
     }).then(resp => {
-        callback({top_types : resp.body.aggregations.types.buckets,
-            top_soustypes : resp.body.aggregations.soustypes.buckets
+        const res = resp.body.aggregations.types.buckets.map(b=>
+            {
+                return {
+                    "type": b.key,
+                    "count":b.doc_count,
+                    "sous_types":b.sous_types.buckets.map(st=> {
+                        return {
+                            "sous_type":st.key,
+                            "count":st.doc_count
+                        }
+                    })
+                }
+
             })
+
+        callback(res);
     })
 }
 
