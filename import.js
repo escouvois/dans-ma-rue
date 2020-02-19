@@ -7,6 +7,8 @@ const indexName = config.get("elasticsearch.index_name");
 async function run() {
   // Create Elasticsearch client
   const client = new Client({ node: config.get("elasticsearch.uri") });
+  const CHUNK_SIZE = 20000;
+  let total = 0;
 
   try{
     await client.indices.delete({
@@ -37,7 +39,7 @@ async function run() {
         separator: ";"
       })
     )
-    .on("data", data => {
+    .on("data", async data => {
       anomalies.push({
         "timestamp": new Date(data.DATEDECL),
         "object_id": data.OBJECTID,
@@ -54,19 +56,27 @@ async function run() {
         "conseil_de_quartier" : data["CONSEIL DE QUARTIER"],
         "location" : data.geo_point_2d
       });
-    })
-    .on("end", async () => {
-      while(anomalies.length) {
+      if (anomalies.length === CHUNK_SIZE) {
         try {
-          let response = await client.bulk(createBulkInsertQuery(anomalies.splice(0,20000)));
-          console.log(`Inserted ${response.body.items.length} anomalies`);
+          let response = await client.bulk(createBulkInsertQuery(anomalies.splice(0, CHUNK_SIZE)));
+          total += response.body.items.length;
         } catch (error) {
           console.trace(error)
         }
       }
+    })
+    .on("end", async () => {
+      if(anomalies.length > 0) {
+        try {
+          let response = await client.bulk(createBulkInsertQuery(anomalies.splice(0, CHUNK_SIZE)));
+          total += response.body.items.length;
+        } catch (error) {
+          console.trace(error)
+        }
+      }
+      console.log(`Inserted ${total} anomalies.`)
     });
 }
-
 
 run().catch(console.error);
 
